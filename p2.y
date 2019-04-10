@@ -245,7 +245,6 @@ char * getField(char * argument,tEmployee tE)
 		else
 		{
 			opp = strtok(argument,"\"");
-			//printf("\n\n%s <- argument", opp);
 		}
 	}
 	return opp;
@@ -295,36 +294,28 @@ int main()
 
 	if(where)
 	{
-		// If there are no conditions, use this dummy case
 		argument1 = "1";
 		argument2 = "1";
 		operator = "=";
 	}
 
-	//hago un primer recorrido de la lista
 	for (k=0; k<length; k++)
 	{
 
 		tEmployee ss1 = getEmployeeFromListByIndex (l, k);
 		field1 = getField(argument1,ss1);
-		//printf("\n\nFIELD1 -> %s",field1);
 
-		//si el primer field es una constante, voy a la ultima iteracion del primer bucle
 		if ((!strncmp(field1,argument1,strlen(field1))) || !strncmp(argument1,"\"",1))
 		{
 			k = length;
 		}
 
-		//hago un segundo recorrido de la lista
 		for(p = 0; p < length;p++)
 		{
 
 			tEmployee ss2 = getEmployeeFromListByIndex (l, p);
 			field2 = getField(argument2,ss2);
-			//printf("\nfield2 -> %s",field2);
 
-			//si el field es una constante, me voy a la ultima iteracion y pongo para imprimir
-			//el empleado correspondiente
 			if ((!strncmp(field2,argument2,strlen(field2)) && k != length)|| !strncmp(argument2,"\"",1))
 			{
 				p = length;
@@ -334,14 +325,11 @@ int main()
 
 			if (!strncmp(operator,"=",1))
 			{
-				//si son iguales los comparo a pelo
-				//me quedo con el maximo por si la primera parte es igual pero luego no
 				len = max(strlen(field1),strlen(field2));
 				print = !strncmp(field1,field2,len);
 			}
 			else
 			{
-				//si llego aqui es que los dos fields son integers
 				atoi1 = atoi(field1);
 				atoi2 = atoi(field2);
 				if (atoi1 != NULL && atoi2 != NULL)
@@ -353,7 +341,6 @@ int main()
 
 			if (print)
 			{
-				// si es *, imprimo todo
 				if (indice == 0)
 					printf("%d %s %s %s %s", ss2->idEmpleado, ss2->nombre, ss2->apellidos, ss2->puesto, ss2->anho);
 				else
