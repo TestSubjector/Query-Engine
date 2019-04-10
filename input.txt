@@ -1,0 +1,1 @@
+SELECT * FROM Empleado WHERE nombre = "Alberto";
