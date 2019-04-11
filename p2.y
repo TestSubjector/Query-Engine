@@ -180,21 +180,22 @@ fieldselect: SELECT FIELD 	{
 
 tEmployeeList parseDB()
 {
-
-	employeeList = createEmployeeList ();
+	employeeList = createEmployeeList (); // Assign memory
 	FILE *f = fopen("EMP.txt", "r" );
 	if (!f)
 	{
-		printf("\n Could not open file EMP for reading.\n");
+		printf("\n Could not open file EMP for reading.");
 		fclose(f);
 		exit(0);
 	}
 
+	// Move file pointer to end of file
 	fseek(f, 0, SEEK_END);
-	long fsize = ftell(f);
+	long fileSize = ftell(f);
+	// Move file pointer to start of file
 	fseek(f, 0, SEEK_SET);
-	char *string = malloc(fsize + 1);
-	fread(string, fsize, 1, f);
+	char *string = malloc(fileSize + 1);
+	fread(string, fileSize, 1, f);
 	fclose(f);
 
 	char * idEmpleado = strtok (string, ",");
@@ -271,6 +272,7 @@ int main()
 	char * field2 =  malloc(sizeof(char)* 80);
 	int p = 0;
 
+	//Call the c function yyparse to cause parsing to occur. This function reads tokens and executes actions,
 	yyparse();
 
 	if (check != 0 || table == NULL)
