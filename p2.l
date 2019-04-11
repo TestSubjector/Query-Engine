@@ -4,7 +4,7 @@
 %}
 
 table Empleado
-field idEmpleado|puesto|anho|apellidos|nombre
+field indexNumber|puesto|anho|apellidos|nombre
 numbers [0-9]+
 operator <|>|=
 comma \,

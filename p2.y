@@ -194,29 +194,31 @@ tEmployeeList parseDB()
 	long fileSize = ftell(f);
 	// Move file pointer to start of file
 	fseek(f, 0, SEEK_SET);
-	char *string = malloc(fileSize + 1);
-	fread(string, fileSize, 1, f);
+	char *fileString = malloc(fileSize + 1);
+	// Read the file and store the contents in string
+	fread(fileString, fileSize, 1, f);
 	fclose(f);
 
-	char * idEmpleado = strtok (string, ",");
+	char * indexNumber = strtok (fileString, ",");
+	// For strtok() to keep searching the same string, pass a NULL pointer as its first argument.
 	char * nombre = strtok (NULL, ",");
 	char * apellidos = strtok (NULL, ",");
 	char * puesto = strtok (NULL, ",");
 	char * anho = strtok (NULL, "\n");
-	tEmployee empleado = createEmployee (nombre, apellidos, puesto,anho, atoi(idEmpleado));
+	tEmployee empleado = createEmployee (nombre, apellidos, puesto, anho, atoi(indexNumber));
 	addEmployeeToList (employeeList, empleado);
 
-
+	// Keep reading word by word
 	while(1)
 	{
-		idEmpleado = strtok (NULL, ",");
-		if (idEmpleado == NULL)
+		indexNumber = strtok (NULL, ",");
+		if (indexNumber == NULL)
 			break;
 		nombre = strtok (NULL, ",");
 		apellidos = strtok (NULL, ",");
 		puesto = strtok (NULL, ",");
 		anho = strtok (NULL, "\n");
-		empleado = createEmployee (nombre, apellidos, puesto,anho, atoi(idEmpleado));
+		empleado = createEmployee (nombre, apellidos, puesto,anho, atoi(indexNumber));
 		addEmployeeToList (employeeList, empleado);
 	}
 	return employeeList;
@@ -224,7 +226,7 @@ tEmployeeList parseDB()
 
 
 
-char * getField(char * argument,tEmployee tE)
+char * getField(char * argument, tEmployee tE)
 {
 	int atoi1 = 0;
 	char * opp =  malloc(sizeof(char)* 80);
@@ -233,8 +235,9 @@ char * getField(char * argument,tEmployee tE)
 		return argument;
 	else
 	{
-		if(!strncmp(argument,"idEmpleado",10))
-			sprintf(opp, "%d", tE->idEmpleado);
+		// strncmp ompares up to num characters of given strings
+		if(!strncmp(argument,"indexNumber",10))
+			sprintf(opp, "Index number used %d", tE->indexNumber);
 		else if(!strncmp(argument,"nombre",10))
 			opp = tE->nombre;
 		else if(!strncmp(argument,"apellidos",10))
@@ -281,18 +284,21 @@ int main()
 		return 0 ;
 	}
 
+	// Get all contents of file
 	tEmployeeList l = parseDB();
+	// Get total length of entries
 	length = lengthEmployeeList(l);
 
+	// This will read the command, indice gives length
 	int i = 0;
-	for (i = 0; i<indice;i++)
+	for (i = 0; i < indice; i++)
 	{
 		printf("\n Field %d -> %s", i, aux[i]);
 	}
 	printf("\n Table -> %s",table);
-	printf("\n Argument1 -> %s",argument1);
-	printf("\n Argument2 -> %s",argument2);
-	printf("\n Argumentr -> %s\n\n",operator);
+	printf("\n Argument_1 -> %s",argument1);
+	printf("\n Argument_2 -> %s",argument2);
+	printf("\n Argument_Opr -> %s\n\n",operator);
 
 	if(where)
 	{
@@ -301,7 +307,7 @@ int main()
 		operator = "=";
 	}
 
-	for (k=0; k<length; k++)
+	for (k=0; k< length; k++)
 	{
 
 		tEmployee ss1 = getEmployeeFromListByIndex (l, k);
@@ -324,7 +330,6 @@ int main()
 				ss2 = ss1;
 			}
 
-
 			if (!strncmp(operator,"=",1))
 			{
 				len = max(strlen(field1),strlen(field2));
@@ -344,15 +349,15 @@ int main()
 			if (print)
 			{
 				if (indice == 0)
-					printf("%d %s %s %s %s", ss2->idEmpleado, ss2->nombre, ss2->apellidos, ss2->puesto, ss2->anho);
+					printf("%d %s %s %s %s", ss2->indexNumber, ss2->nombre, ss2->apellidos, ss2->puesto, ss2->anho);
 				else
 				{
 					i = 0;
 					for (i=0; i< indice; i++)
 					{
 						field = aux[i];
-						if(!strncmp(field,"idEmpleado",10))
-							printf(" %d ",ss2->idEmpleado);
+						if(!strncmp(field,"indexNumber",10))
+							printf(" %d ",ss2->indexNumber);
 						if(!strncmp(field,"nombre",6))
 							printf(" %s ",ss2->nombre);
 						if(!strncmp(field,"apellidos",9))

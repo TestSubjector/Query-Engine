@@ -1,6 +1,6 @@
 #include "employee.h"
 
-tEmployee createEmployee (char *nombre,char *apellidos,char *puesto, char *anho, int idEmpleado)
+tEmployee createEmployee (char *nombre,char *apellidos,char *puesto, char *anho, int indexNumber)
 {
 	tEmployee tmp = (tEmployee) malloc (sizeof (struct tEEmployee));
 
@@ -17,7 +17,7 @@ tEmployee createEmployee (char *nombre,char *apellidos,char *puesto, char *anho,
 
 	tmp->anho = (char*) malloc (sizeof (char) * strlen (anho)+1);
 	strcpy (tmp->anho, anho);
-	tmp->idEmpleado = idEmpleado;
+	tmp->indexNumber = indexNumber;
 	return tmp;
 }
 

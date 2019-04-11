@@ -11,7 +11,7 @@ struct tEEmployee
 	char *apellidos;
 	char *puesto;
 	char *anho;
-	int idEmpleado;
+	int indexNumber;
 };
 
 typedef struct tEEmployee *tEmployee;
@@ -32,7 +32,7 @@ struct tEEmployeeList
 
 typedef struct tEEmployeeList *tEmployeeList;
 
-tEmployee createEmployee (char *nombre,char *apellidos,char *puesto, char *anho, int idEmpleado);
+tEmployee createEmployee (char *nombre,char *apellidos,char *puesto, char *anho, int indexNumber);
 
 tEmployeeList createEmployeeList ();
 
