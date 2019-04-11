@@ -1,1 +1,2 @@
-SELECT * FROM Empleado WHERE nombre = "Alberto";
+SELECT * FROM Employee WHERE ename = "Antonio";
+SELECT indexNumber, ename FROM Employee WHERE ename = "Antonio";

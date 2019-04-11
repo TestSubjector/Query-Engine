@@ -8,7 +8,7 @@
 
 	int numMedidas = 0;
 	tEmployeeList employeeList;
-	char aux[10][20];
+	char auxillary[10][20];
 	int indice = 0;
 	char * table;
 	char * argument1;
@@ -146,15 +146,19 @@ selectasterisk: SELECT ASTERISK {printf("\n |asterisk| command - ");}
 ;
 
 fieldselect: SELECT FIELD 	{
-								strcpy(aux[indice], $2);
+								strcpy(auxillary[indice], $2);
 								indice++;
 								printf("\n Select");
 							}
-	| fieldselect COMMA FIELD {strcpy(aux[indice], $3);indice++;printf("\nselect2");}
+	| fieldselect COMMA FIELD
+	{
+		strcpy(auxillary[indice], $3);
+		indice++;printf("\n Select2 ");
+	}
 	| SELECT error
 	{
 		strcpy(errorFlag,"\n ERROR: Unrecognised token;");
-		strcat(errorFlag,"2");
+		// strcat(errorFlag,"2");
 		yyerror(errorFlag);
 		check = 1;
 		return;
@@ -201,11 +205,11 @@ tEmployeeList parseDB()
 
 	char * indexNumber = strtok (fileString, ",");
 	// For strtok() to keep searching the same string, pass a NULL pointer as its first argument.
-	char * nombre = strtok (NULL, ",");
+	char * ename = strtok (NULL, ",");
 	char * apellidos = strtok (NULL, ",");
 	char * puesto = strtok (NULL, ",");
 	char * anho = strtok (NULL, "\n");
-	tEmployee empleado = createEmployee (nombre, apellidos, puesto, anho, atoi(indexNumber));
+	tEmployee empleado = createEmployee (ename, apellidos, puesto, anho, atoi(indexNumber));
 	addEmployeeToList (employeeList, empleado);
 
 	// Keep reading word by word
@@ -214,11 +218,11 @@ tEmployeeList parseDB()
 		indexNumber = strtok (NULL, ",");
 		if (indexNumber == NULL)
 			break;
-		nombre = strtok (NULL, ",");
+		ename = strtok (NULL, ",");
 		apellidos = strtok (NULL, ",");
 		puesto = strtok (NULL, ",");
 		anho = strtok (NULL, "\n");
-		empleado = createEmployee (nombre, apellidos, puesto,anho, atoi(indexNumber));
+		empleado = createEmployee (ename, apellidos, puesto,anho, atoi(indexNumber));
 		addEmployeeToList (employeeList, empleado);
 	}
 	return employeeList;
@@ -238,8 +242,8 @@ char * getField(char * argument, tEmployee tE)
 		// strncmp ompares up to num characters of given strings
 		if(!strncmp(argument,"indexNumber",10))
 			sprintf(opp, "Index number used %d", tE->indexNumber);
-		else if(!strncmp(argument,"nombre",10))
-			opp = tE->nombre;
+		else if(!strncmp(argument,"ename",10))
+			opp = tE->ename;
 		else if(!strncmp(argument,"apellidos",10))
 			opp = tE->apellidos;
 		else if(!strncmp(argument,"anho",10))
@@ -293,7 +297,7 @@ int main()
 	int i = 0;
 	for (i = 0; i < indice; i++)
 	{
-		printf("\n Field %d -> %s", i, aux[i]);
+		printf("\n Field %d -> %s", i, auxillary[i]);
 	}
 	printf("\n Table -> %s",table);
 	printf("\n Argument_1 -> %s",argument1);
@@ -307,11 +311,12 @@ int main()
 		operator = "=";
 	}
 
-	for (k=0; k< length; k++)
+	// Iterate for every single employee
+	for (k=0; k < length; k++)
 	{
 
 		tEmployee ss1 = getEmployeeFromListByIndex (l, k);
-		field1 = getField(argument1,ss1);
+		field1 = getField(argument1,ss1); // Get required field
 
 		if ((!strncmp(field1,argument1,strlen(field1))) || !strncmp(argument1,"\"",1))
 		{
@@ -349,17 +354,17 @@ int main()
 			if (print)
 			{
 				if (indice == 0)
-					printf("%d %s %s %s %s", ss2->indexNumber, ss2->nombre, ss2->apellidos, ss2->puesto, ss2->anho);
+					printf("%d %s %s %s %s", ss2->indexNumber, ss2->ename, ss2->apellidos, ss2->puesto, ss2->anho);
 				else
 				{
 					i = 0;
 					for (i=0; i< indice; i++)
 					{
-						field = aux[i];
+						field = auxillary[i];
 						if(!strncmp(field,"indexNumber",10))
 							printf(" %d ",ss2->indexNumber);
-						if(!strncmp(field,"nombre",6))
-							printf(" %s ",ss2->nombre);
+						if(!strncmp(field,"ename",6))
+							printf(" %s ",ss2->ename);
 						if(!strncmp(field,"apellidos",9))
 							printf(" %s ",ss2->apellidos);
 						if(!strncmp(field,"anho",4))

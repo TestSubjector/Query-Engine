@@ -3,8 +3,8 @@
 #include "p2.tab.h"
 %}
 
-table Empleado
-field indexNumber|puesto|anho|apellidos|nombre
+table Employee
+field indexNumber|puesto|anho|apellidos|ename
 numbers [0-9]+
 operator <|>|=
 comma \,

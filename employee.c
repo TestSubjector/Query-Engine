@@ -1,14 +1,14 @@
 #include "employee.h"
 
-tEmployee createEmployee (char *nombre,char *apellidos,char *puesto, char *anho, int indexNumber)
+tEmployee createEmployee (char *ename, char *apellidos,char *puesto, char *anho, int indexNumber)
 {
 	tEmployee tmp = (tEmployee) malloc (sizeof (struct tEEmployee));
 
 	if (tmp == NULL)
 		return NULL;
 
-	tmp->nombre = (char*) malloc (sizeof (char) * strlen (nombre)+1);
-	strcpy (tmp->nombre, nombre);
+	tmp->ename = (char*) malloc (sizeof (char) * strlen (ename)+1);
+	strcpy (tmp->ename, ename);
 	tmp->apellidos = (char*) malloc (sizeof (char) * strlen (apellidos)+1);
 	strcpy (tmp->apellidos, apellidos);
 
@@ -49,7 +49,7 @@ void deleteEmployeeList (tEmployeeList *EmployeeList)
 	{
 		employee = (tNodeEmployee)(*EmployeeList)->head;
 		(*EmployeeList)->head = employee->sig;
-		free (employee->tEmployee->nombre);
+		free (employee->tEmployee->ename);
 		free (employee->tEmployee->apellidos);
 		free (employee->tEmployee->puesto);
 		free (employee->tEmployee->anho);
@@ -65,7 +65,6 @@ int addEmployeeToList (tEmployeeList EmployeeList, tEmployee employee)
 {
 
 	tNodeEmployee tmp = (tNodeEmployee) malloc (sizeof (struct tSNodeEmployee));
-
 	if (tmp == NULL)
 		return 1;
 
@@ -85,10 +84,10 @@ int addEmployeeToList (tEmployeeList EmployeeList, tEmployee employee)
 
 void removeFromEmployeeListIndex (tEmployeeList EmployeeList, int index)
 {
-	tNodeEmployee aux = EmployeeList->head;
+	tNodeEmployee auxillary = EmployeeList->head;
 	int count = 1;
 
-	if ((aux->sig == NULL))
+	if ((auxillary->sig == NULL))
 	{
 		if (index == 0){
 			EmployeeList->head = NULL;
@@ -103,15 +102,15 @@ void removeFromEmployeeListIndex (tEmployeeList EmployeeList, int index)
 		return;
 	}
 
-	while ((aux->sig != NULL) && (count < index))
+	while ((auxillary->sig != NULL) && (count < index))
 	{
-		aux = aux->sig;
+		auxillary = auxillary->sig;
 		count ++;
 	}
 	tNodeEmployee employee;
-	employee = aux->sig;
-	aux->sig = (aux->sig)->sig;
-	free (employee->tEmployee->nombre);
+	employee = auxillary->sig;
+	auxillary->sig = (auxillary->sig)->sig;
+	free (employee->tEmployee->ename);
 	free (employee->tEmployee->apellidos);
 	free (employee->tEmployee->puesto);
 	free (employee->tEmployee->anho);
@@ -121,12 +120,12 @@ void removeFromEmployeeListIndex (tEmployeeList EmployeeList, int index)
 
 int lengthEmployeeList (tEmployeeList EmployeeList)
 {
-	tNodeEmployee aux = EmployeeList->head;
+	tNodeEmployee auxillary = EmployeeList->head;
 	int count = 0;
 
-	while (aux != NULL)
+	while (auxillary != NULL)
 	{
-		aux = aux->sig;
+		auxillary = auxillary->sig;
 		count ++;
 	}
 	return count;
@@ -136,16 +135,16 @@ int lengthEmployeeList (tEmployeeList EmployeeList)
 tEmployee getEmployeeFromListByIndex (tEmployeeList EmployeeList, int index)
 {
 
-	tNodeEmployee aux = EmployeeList->head;
+	tNodeEmployee auxillary = EmployeeList->head;
 	int count = 0;
 
-	while ((aux != NULL) && (count < index))
+	while ((auxillary != NULL) && (count < index))
 	{
-		aux = aux->sig;
+		auxillary = auxillary->sig;
 		count ++;
 	}
 
-	if (aux == NULL)
+	if (auxillary == NULL)
 		return NULL;
-	return aux->tEmployee;
+	return auxillary->tEmployee;
 }
