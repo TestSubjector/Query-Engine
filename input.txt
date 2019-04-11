@@ -1,2 +1,2 @@
-GET * FROM Employee WHERE ename = "Shreya Gupta";
+GET * FROM Employee WHERE ename = "Rutuja Betgeri";
 GET indexNumber, ename FROM Employee WHERE ename = "Antonio";

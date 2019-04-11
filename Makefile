@@ -1,7 +1,7 @@
 FILENAME = p2
 INPUT = input.txt
 
-all: cls employee.o compile run
+all: cls employee.o compile
 cls:
 	clear
 employee.o:

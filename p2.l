@@ -3,8 +3,8 @@
 #include "p2.tab.h"
 %}
 
-table Employee
-field indexNumber|puesto|anho|eage|ename
+table Employee|Department
+field indexNumber|eaddress|salary|eage|ename
 numbers [0-9]+
 operator <|>|=
 comma \,
@@ -17,6 +17,8 @@ stringvalue \".+\"
 GET {return GET;}
 FROM {return FROM;}
 WHERE {return WHERE;}
+AND {return AND;}
+OR {return OR;}
 
 {table} {
 			yylval.valString = strdup(yytext);

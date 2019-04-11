@@ -32,9 +32,9 @@
 	char * valString;
 }
 
-%token GET FROM WHERE
+%token GET FROM WHERE AND OR
 %token <valString> FIELD TABLE OPERATOR EOFF NUMBERS COMMA SEMICOLON ASTERISK STRINGVALUE WORD
-%type <valString> fieldselect fromtable selectfrom wheretable wherefrom argument
+%type <valString> fieldget fromtable getfrom wheretable wherefrom argument
 %start S
 %%
 
@@ -114,8 +114,8 @@ wherefrom: fromtable WHERE {printf("\n |wherefrom| command - ");}
 		}
 ;
 
-fromtable: selectfrom TABLE {table = $2; printf("\n |fromtable| command - ");}
-	| selectfrom error
+fromtable: getfrom TABLE {table = $2; printf("\n |fromtable| command - ");}
+	| getfrom error
 		{
 			yyerror("\n ERROR: Table name is not recognised ;");
 			check = 1;
@@ -123,9 +123,9 @@ fromtable: selectfrom TABLE {table = $2; printf("\n |fromtable| command - ");}
 		}
 ;
 
-selectfrom: fieldselect FROM {printf("\n |selectfrom| command - ");}
-	| selectasterisk FROM {printf("\n |asterisk| selection");}
-	| fieldselect error
+getfrom: fieldget FROM {printf("\n |getfrom| command - ");}
+	| getasterisk FROM {printf("\n |asterisk| getion");}
+	| fieldget error
 		{
 			strcpy(errorFlag,"\n ERROR: Not recognised ");
 			sprintf(buffer, 2, "%d", indice+2);
@@ -136,8 +136,8 @@ selectfrom: fieldselect FROM {printf("\n |selectfrom| command - ");}
 		}
 ;
 
-selectasterisk: GET ASTERISK {printf("\n |asterisk| command - ");}
-	| selectasterisk error
+getasterisk: GET ASTERISK {printf("\n |asterisk| command - ");}
+	| getasterisk error
 		{
 			yyerror("\n ERROR: There must be a FROM after the asterisk;");
 			check = 1;
@@ -145,15 +145,15 @@ selectasterisk: GET ASTERISK {printf("\n |asterisk| command - ");}
 		}
 ;
 
-fieldselect: GET FIELD 	{
+fieldget: GET FIELD 	{
 								strcpy(auxillary[indice], $2);
 								indice++;
-								printf("\n Select");
+								printf("\n Get");
 							}
-	| fieldselect COMMA FIELD
+	| fieldget COMMA FIELD
 	{
 		strcpy(auxillary[indice], $3);
-		indice++;printf("\n Select2 ");
+		indice++;printf("\n Get2 ");
 	}
 	| GET error
 	{
@@ -163,7 +163,7 @@ fieldselect: GET FIELD 	{
 		check = 1;
 		return;
 	}
-	| fieldselect FIELD error
+	| fieldget FIELD error
 	{
 		strcpy(errorFlag,"\n ERROR: Unrecognised token;");
 		snprintf(buffer, 2, "%d", indice+3);
@@ -207,9 +207,9 @@ tEmployeeList parseDB()
 	// For strtok() to keep searching the same string, pass a NULL pointer as its first argument.
 	char * ename = strtok (NULL, ",");
 	char * eage = strtok (NULL, ",");
-	char * puesto = strtok (NULL, ",");
-	char * anho = strtok (NULL, "\n");
-	tEmployee empleado = createEmployee (ename, eage, puesto, anho, atoi(indexNumber));
+	char * eaddress = strtok (NULL, ",");
+	char * salary = strtok (NULL, "\n");
+	tEmployee empleado = createEmployee (ename, eage, eaddress, salary, atoi(indexNumber));
 	addEmployeeToList (employeeList, empleado);
 
 	// Keep reading word by word
@@ -220,9 +220,9 @@ tEmployeeList parseDB()
 			break;
 		ename = strtok (NULL, ",");
 		eage = strtok (NULL, ",");
-		puesto = strtok (NULL, ",");
-		anho = strtok (NULL, "\n");
-		empleado = createEmployee (ename, eage, puesto,anho, atoi(indexNumber));
+		eaddress = strtok (NULL, ",");
+		salary = strtok (NULL, "\n");
+		empleado = createEmployee (ename, eage, eaddress, salary, atoi(indexNumber));
 		addEmployeeToList (employeeList, empleado);
 	}
 	return employeeList;
@@ -246,10 +246,10 @@ char * getField(char * argument, tEmployee tE)
 			opp = tE->ename;
 		else if(!strncmp(argument,"eage",10))
 			opp = tE->eage;
-		else if(!strncmp(argument,"anho",10))
-			opp = tE->anho;
-		else if(!strncmp(argument,"puesto",10))
-			opp = tE->puesto;
+		else if(!strncmp(argument,"salary",10))
+			opp = tE->salary;
+		else if(!strncmp(argument,"eaddress",10))
+			opp = tE->eaddress;
 		else
 		{
 			opp = strtok(argument,"\"");
@@ -279,7 +279,9 @@ int main()
 	char * field2 =  malloc(sizeof(char)* 80);
 	int p = 0;
 
-	//Call the c function yyparse to cause parsing to occur. This function reads tokens and executes actions,
+	while(1)
+	{
+			//Call the c function yyparse to cause parsing to occur. This function reads tokens and executes actions,
 	yyparse();
 
 	if (check != 0 || table == NULL)
@@ -325,7 +327,7 @@ int main()
 
 		for(p = 0; p < length;p++)
 		{
-
+			// Second list
 			tEmployee ss2 = getEmployeeFromListByIndex (l, p);
 			field2 = getField(argument2,ss2);
 
@@ -354,7 +356,7 @@ int main()
 			if (print)
 			{
 				if (indice == 0)
-					printf("%d %s %s %s %s", ss2->indexNumber, ss2->ename, ss2->eage, ss2->puesto, ss2->anho);
+					printf("%d %s %s %s %s", ss2->indexNumber, ss2->ename, ss2->eage, ss2->eaddress, ss2->salary);
 				else
 				{
 					i = 0;
@@ -367,15 +369,16 @@ int main()
 							printf(" %s ",ss2->ename);
 						if(!strncmp(field,"eage",9))
 							printf(" %s ",ss2->eage);
-						if(!strncmp(field,"anho",4))
-							printf(" %s ",ss2->anho);
-						if(!strncmp(field,"puesto",6))
-							printf(" %s ",ss2->puesto);
+						if(!strncmp(field,"salary",4))
+							printf(" %s ",ss2->salary);
+						if(!strncmp(field,"eaddress",6))
+							printf(" %s ",ss2->eaddress);
 					}
 				}
 			printf("\n");
 			}
 		}
+	}
 	}
 	return 0;
 }

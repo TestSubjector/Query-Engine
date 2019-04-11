@@ -1,6 +1,6 @@
 #include "employee.h"
 
-tEmployee createEmployee (char *ename, int eage, char *puesto, char *anho, int indexNumber)
+tEmployee createEmployee (char *ename, int eage, char *eaddress, int salary, int indexNumber)
 {
 	tEmployee tmp = (tEmployee) malloc (sizeof (struct tEEmployee));
 
@@ -11,11 +11,10 @@ tEmployee createEmployee (char *ename, int eage, char *puesto, char *anho, int i
 	strcpy (tmp->ename, ename);
 	tmp->eage = eage;
 
-	tmp->puesto = (char*) malloc (sizeof (char) * strlen (puesto)+1);
-	strcpy (tmp->puesto, puesto);
+	tmp->eaddress = (char*) malloc (sizeof (char) * strlen (eaddress)+1);
+	strcpy (tmp->eaddress, eaddress);
 
-	tmp->anho = (char*) malloc (sizeof (char) * strlen (anho)+1);
-	strcpy (tmp->anho, anho);
+	tmp->salary = salary;
 	tmp->indexNumber = indexNumber;
 	return tmp;
 }
@@ -49,8 +48,7 @@ void deleteEmployeeList (tEmployeeList *EmployeeList)
 		employee = (tNodeEmployee)(*EmployeeList)->head;
 		(*EmployeeList)->head = employee->sig;
 		free (employee->tEmployee->ename);
-		free (employee->tEmployee->puesto);
-		free (employee->tEmployee->anho);
+		free (employee->tEmployee->eaddress);
 		free (employee->tEmployee);
 		free (employee);
 	}
@@ -109,8 +107,7 @@ void removeFromEmployeeListIndex (tEmployeeList EmployeeList, int index)
 	employee = auxillary->sig;
 	auxillary->sig = (auxillary->sig)->sig;
 	free (employee->tEmployee->ename);
-	free (employee->tEmployee->puesto);
-	free (employee->tEmployee->anho);
+	free (employee->tEmployee->eaddress);
 	free (employee->tEmployee);
 	free (employee);
 }
