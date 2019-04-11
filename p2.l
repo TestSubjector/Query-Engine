@@ -4,7 +4,7 @@
 %}
 
 table Employee
-field indexNumber|puesto|anho|apellidos|ename
+field indexNumber|puesto|anho|eage|ename
 numbers [0-9]+
 operator <|>|=
 comma \,
@@ -14,7 +14,7 @@ stringvalue \".+\"
 %%
   {}
 <<EOF>> {return EOFF;}
-SELECT {return SELECT;}
+GET {return GET;}
 FROM {return FROM;}
 WHERE {return WHERE;}
 

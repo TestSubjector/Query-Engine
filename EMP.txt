@@ -1,4 +1,4 @@
-1,Shreya,Gupta,Microsoft Intern ML,2019
-2,Antonio,Alonso Bueno,Analista de sistemas,2000
-3,Belon,Lopez,Comercial,2003
-4,Rutuja,Betgeri,Microsoft Intern Blockchain,2019
+1,Shreya Gupta,21, Microsoft Intern ML,2019
+2,Antonio Alonso Bueno, 41, Analista de sistemas,2000
+3,Belon Lopez,34,Comercial,2003
+4,Rutuja,Betgeri,21,Microsoft Intern Blockchain,2019

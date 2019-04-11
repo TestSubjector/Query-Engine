@@ -1,2 +1,2 @@
-SELECT * FROM Employee WHERE ename = "Antonio";
-SELECT indexNumber, ename FROM Employee WHERE ename = "Antonio";
+GET * FROM Employee WHERE ename = "Shreya Gupta";
+GET indexNumber, ename FROM Employee WHERE ename = "Antonio";

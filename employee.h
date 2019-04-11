@@ -8,7 +8,7 @@
 struct tEEmployee
 {
 	char *ename;
-	char *apellidos;
+	int eage;
 	char *puesto;
 	char *anho;
 	int indexNumber;
@@ -32,7 +32,7 @@ struct tEEmployeeList
 
 typedef struct tEEmployeeList *tEmployeeList;
 
-tEmployee createEmployee (char *ename,char *apellidos,char *puesto, char *anho, int indexNumber);
+tEmployee createEmployee (char *ename, int eage, char *puesto, char *anho, int indexNumber);
 
 tEmployeeList createEmployeeList ();
 

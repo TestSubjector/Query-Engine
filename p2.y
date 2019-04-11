@@ -32,7 +32,7 @@
 	char * valString;
 }
 
-%token SELECT FROM WHERE
+%token GET FROM WHERE
 %token <valString> FIELD TABLE OPERATOR EOFF NUMBERS COMMA SEMICOLON ASTERISK STRINGVALUE WORD
 %type <valString> fieldselect fromtable selectfrom wheretable wherefrom argument
 %start S
@@ -136,7 +136,7 @@ selectfrom: fieldselect FROM {printf("\n |selectfrom| command - ");}
 		}
 ;
 
-selectasterisk: SELECT ASTERISK {printf("\n |asterisk| command - ");}
+selectasterisk: GET ASTERISK {printf("\n |asterisk| command - ");}
 	| selectasterisk error
 		{
 			yyerror("\n ERROR: There must be a FROM after the asterisk;");
@@ -145,7 +145,7 @@ selectasterisk: SELECT ASTERISK {printf("\n |asterisk| command - ");}
 		}
 ;
 
-fieldselect: SELECT FIELD 	{
+fieldselect: GET FIELD 	{
 								strcpy(auxillary[indice], $2);
 								indice++;
 								printf("\n Select");
@@ -155,7 +155,7 @@ fieldselect: SELECT FIELD 	{
 		strcpy(auxillary[indice], $3);
 		indice++;printf("\n Select2 ");
 	}
-	| SELECT error
+	| GET error
 	{
 		strcpy(errorFlag,"\n ERROR: Unrecognised token;");
 		// strcat(errorFlag,"2");
@@ -206,10 +206,10 @@ tEmployeeList parseDB()
 	char * indexNumber = strtok (fileString, ",");
 	// For strtok() to keep searching the same string, pass a NULL pointer as its first argument.
 	char * ename = strtok (NULL, ",");
-	char * apellidos = strtok (NULL, ",");
+	char * eage = strtok (NULL, ",");
 	char * puesto = strtok (NULL, ",");
 	char * anho = strtok (NULL, "\n");
-	tEmployee empleado = createEmployee (ename, apellidos, puesto, anho, atoi(indexNumber));
+	tEmployee empleado = createEmployee (ename, eage, puesto, anho, atoi(indexNumber));
 	addEmployeeToList (employeeList, empleado);
 
 	// Keep reading word by word
@@ -219,10 +219,10 @@ tEmployeeList parseDB()
 		if (indexNumber == NULL)
 			break;
 		ename = strtok (NULL, ",");
-		apellidos = strtok (NULL, ",");
+		eage = strtok (NULL, ",");
 		puesto = strtok (NULL, ",");
 		anho = strtok (NULL, "\n");
-		empleado = createEmployee (ename, apellidos, puesto,anho, atoi(indexNumber));
+		empleado = createEmployee (ename, eage, puesto,anho, atoi(indexNumber));
 		addEmployeeToList (employeeList, empleado);
 	}
 	return employeeList;
@@ -244,8 +244,8 @@ char * getField(char * argument, tEmployee tE)
 			sprintf(opp, "Index number used %d", tE->indexNumber);
 		else if(!strncmp(argument,"ename",10))
 			opp = tE->ename;
-		else if(!strncmp(argument,"apellidos",10))
-			opp = tE->apellidos;
+		else if(!strncmp(argument,"eage",10))
+			opp = tE->eage;
 		else if(!strncmp(argument,"anho",10))
 			opp = tE->anho;
 		else if(!strncmp(argument,"puesto",10))
@@ -354,7 +354,7 @@ int main()
 			if (print)
 			{
 				if (indice == 0)
-					printf("%d %s %s %s %s", ss2->indexNumber, ss2->ename, ss2->apellidos, ss2->puesto, ss2->anho);
+					printf("%d %s %s %s %s", ss2->indexNumber, ss2->ename, ss2->eage, ss2->puesto, ss2->anho);
 				else
 				{
 					i = 0;
@@ -365,8 +365,8 @@ int main()
 							printf(" %d ",ss2->indexNumber);
 						if(!strncmp(field,"ename",6))
 							printf(" %s ",ss2->ename);
-						if(!strncmp(field,"apellidos",9))
-							printf(" %s ",ss2->apellidos);
+						if(!strncmp(field,"eage",9))
+							printf(" %s ",ss2->eage);
 						if(!strncmp(field,"anho",4))
 							printf(" %s ",ss2->anho);
 						if(!strncmp(field,"puesto",6))
