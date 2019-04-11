@@ -28,13 +28,12 @@
 %union
 {
 	int valInt;
-	float valFloat;
 	char * valString;
 }
 
 %token GET FROM WHERE AND OR
-%token <valString> FIELD TABLE OPERATOR EOFF NUMBERS COMMA SEMICOLON ASTERISK STRINGVALUE WORD
-%type <valString> fieldget fromtable getfrom wheretable wherefrom argument
+%token <valString> FIELD TABLE OPERATOR EOFF NUMBERS COMMA SEMICOLON ASTERISK STRINGVALUE WORD SINGLEQUOTES
+%type <valString> fieldget fromtable getfrom wheretable wherefrom argument condition check
 %start S
 %%
 
@@ -50,16 +49,13 @@ S:  wheretable
 	}
 ;
 
-wheretable: wherefrom argument OPERATOR argument SEMICOLON
+wheretable: wherefrom condition SEMICOLON
 {
 	printf("\n |where| command- ");
-	argument1 = $2;
-	operator = $3;
-	argument2 = $4;
 }
 ;
 
-wheretable: wherefrom argument OPERATOR argument
+wheretable: wherefrom condition
 		{
 			yyerror("ERROR: No semicolon in input;");
 			check = 1;
@@ -124,7 +120,7 @@ fromtable: getfrom TABLE {table = $2; printf("\n |fromtable| command - ");}
 ;
 
 getfrom: fieldget FROM {printf("\n |getfrom| command - ");}
-	| getasterisk FROM {printf("\n |asterisk| getion");}
+	| getasterisk FROM {printf("\n |asterisk| sign ");}
 	| fieldget error
 		{
 			strcpy(errorFlag,"\n ERROR: Not recognised ");
@@ -171,6 +167,29 @@ fieldget: GET FIELD 	{
 		yyerror(errorFlag);
 		check = 1;
 		return;
+	}
+;
+
+condition: check AND condition
+	{
+		printf("\n AND command;");
+	}
+	| check OR condition
+	{
+		printf("\n OR command;");
+	}
+	| check
+	{
+		printf("\n Final command;");
+	}
+;
+
+check:	argument OPERATOR argument
+	{
+		printf("\n Reaching commands;");
+		argument1 = $1;
+		operator = $2;
+		argument2 = $3;
 	}
 ;
 
@@ -239,7 +258,7 @@ char * getField(char * argument, tEmployee tE)
 		return argument;
 	else
 	{
-		// strncmp ompares up to num characters of given strings
+		// strncmp compares up to num characters of given strings
 		if(!strncmp(argument,"indexNumber",10))
 			sprintf(opp, "Index number used %d", tE->indexNumber);
 		else if(!strncmp(argument,"ename",10))
@@ -272,7 +291,7 @@ int main()
 	int length;
 	int len;
 	int atoi1, atoi2;
-	int print = 0;
+	int printFlag = 0;
 	int k = 0;
 	char * test;
 	char * field1 =  malloc(sizeof(char)* 80);
@@ -281,104 +300,103 @@ int main()
 
 	while(1)
 	{
-			//Call the c function yyparse to cause parsing to occur. This function reads tokens and executes actions,
-	yyparse();
+		//Call the c function yyparse to cause parsing to occur. This function reads tokens and executes actions,
+		yyparse();
 
-	if (check != 0 || table == NULL)
-	{
-		printf("\n Exiting...\n");
-		return 0 ;
-	}
-
-	// Get all contents of file
-	tEmployeeList l = parseDB();
-	// Get total length of entries
-	length = lengthEmployeeList(l);
-
-	// This will read the command, indice gives length
-	int i = 0;
-	for (i = 0; i < indice; i++)
-	{
-		printf("\n Field %d -> %s", i, auxillary[i]);
-	}
-	printf("\n Table -> %s",table);
-	printf("\n Argument_1 -> %s",argument1);
-	printf("\n Argument_2 -> %s",argument2);
-	printf("\n Argument_Opr -> %s\n\n",operator);
-
-	if(where)
-	{
-		argument1 = "1";
-		argument2 = "1";
-		operator = "=";
-	}
-
-	// Iterate for every single employee
-	for (k=0; k < length; k++)
-	{
-
-		tEmployee ss1 = getEmployeeFromListByIndex (l, k);
-		field1 = getField(argument1,ss1); // Get required field
-
-		if ((!strncmp(field1,argument1,strlen(field1))) || !strncmp(argument1,"\"",1))
+		if (check != 0 || table == NULL)
 		{
-			k = length;
+			printf("\n Exiting...\n");
+			return 0 ;
 		}
 
-		for(p = 0; p < length;p++)
+		// Get all contents of file
+		tEmployeeList l = parseDB();
+		// Get total length of entries
+		length = lengthEmployeeList(l);
+
+		// This will read the command, indice gives length
+		int i = 0;
+		for (i = 0; i < indice; i++)
 		{
-			// Second list
-			tEmployee ss2 = getEmployeeFromListByIndex (l, p);
-			field2 = getField(argument2,ss2);
+			printf("\n Field %d -> %s", i, auxillary[i]);
+		}
+		printf("\n Table -> %s",table);
+		printf("\n Argument_1 -> %s",argument1);
+		printf("\n Argument_2 -> %s",argument2);
+		printf("\n Argument_Opr -> %s\n\n",operator);
 
-			if ((!strncmp(field2,argument2,strlen(field2)) && k != length)|| !strncmp(argument2,"\"",1))
+		if(where)
+		{
+			argument1 = "1";
+			argument2 = "1";
+			operator = "=";
+		}
+
+		// Iterate for every single employee
+		for (k=0; k < length; k++)
+		{
+			tEmployee ss1 = getEmployeeFromListByIndex (l, k);
+			field1 = getField(argument1,ss1); // Get required field
+
+			if ((!strncmp(field1,argument1,strlen(field1))) || !strncmp(argument1,"\"",1))
 			{
-				p = length;
-				ss2 = ss1;
+				k = length;
 			}
 
-			if (!strncmp(operator,"=",1))
+			for(p = 0; p < length;p++)
 			{
-				len = max(strlen(field1),strlen(field2));
-				print = !strncmp(field1,field2,len);
-			}
-			else
-			{
-				atoi1 = atoi(field1);
-				atoi2 = atoi(field2);
-				if (atoi1 != NULL && atoi2 != NULL)
-					if (!strncmp(operator,">",1))
-						print = atoi1 > atoi2;
-					if (!strncmp(operator,"<",1))
-						print = atoi1 < atoi2;
-			}
+				// Second list
+				tEmployee ss2 = getEmployeeFromListByIndex (l, p);
+				field2 = getField(argument2,ss2);
 
-			if (print)
-			{
-				if (indice == 0)
-					printf("%d %s %s %s %s", ss2->indexNumber, ss2->ename, ss2->eage, ss2->eaddress, ss2->salary);
+				if ((!strncmp(field2,argument2,strlen(field2)) && k != length)|| !strncmp(argument2,"\"",1))
+				{
+					p = length;
+					ss2 = ss1;
+				}
+
+				if (!strncmp(operator,"=",1))
+				{
+					len = max(strlen(field1),strlen(field2));
+					printFlag = !strncmp(field1,field2,len);
+				}
 				else
 				{
-					i = 0;
-					for (i=0; i< indice; i++)
-					{
-						field = auxillary[i];
-						if(!strncmp(field,"indexNumber",10))
-							printf(" %d ",ss2->indexNumber);
-						if(!strncmp(field,"ename",6))
-							printf(" %s ",ss2->ename);
-						if(!strncmp(field,"eage",9))
-							printf(" %s ",ss2->eage);
-						if(!strncmp(field,"salary",4))
-							printf(" %s ",ss2->salary);
-						if(!strncmp(field,"eaddress",6))
-							printf(" %s ",ss2->eaddress);
-					}
+					atoi1 = atoi(field1);
+					atoi2 = atoi(field2);
+					if (atoi1 != NULL && atoi2 != NULL)
+						if (!strncmp(operator,">",1))
+							printFlag = atoi1 > atoi2;
+						if (!strncmp(operator,"<",1))
+							printFlag = atoi1 < atoi2;
 				}
-			printf("\n");
+
+				if (printFlag)
+				{
+					if (indice == 0)
+						printf("%d %s %s %s %s", ss2->indexNumber, ss2->ename, ss2->eage, ss2->eaddress, ss2->salary);
+					else
+					{
+						i = 0;
+						for (i=0; i< indice; i++)
+						{
+							field = auxillary[i];
+							if(!strncmp(field,"indexNumber",10))
+								printf(" %d ",ss2->indexNumber);
+							if(!strncmp(field,"ename",6))
+								printf(" %s ",ss2->ename);
+							if(!strncmp(field,"eage",9))
+								printf(" %s ",ss2->eage);
+							if(!strncmp(field,"salary",4))
+								printf(" %s ",ss2->salary);
+							if(!strncmp(field,"eaddress",6))
+								printf(" %s ",ss2->eaddress);
+						}
+					}
+				printf("\n");
+				}
 			}
 		}
-	}
 	}
 	return 0;
 }

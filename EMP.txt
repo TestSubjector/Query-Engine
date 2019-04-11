@@ -1,4 +1,4 @@
 1,Shreya Gupta,21,BITS Pilani Campus,1000000
-2,Broot Fos, 41, Trinity,2000000
+2,Broot Fos,41,Trinity,2000000
 3,Campill Eerer,34,TM Munich,200
 4,Rutuja Betgeri,121,BITS Hyderabad Campus,-10

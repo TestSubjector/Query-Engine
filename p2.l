@@ -11,6 +11,7 @@ comma \,
 semicolon \;
 asterisk \*
 stringvalue \".+\"
+singlequotes \'
 %%
   {}
 <<EOF>> {return EOFF;}
