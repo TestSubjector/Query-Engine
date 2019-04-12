@@ -10,6 +10,7 @@
 	tEmployeeList employeeList;
 	char auxillary[10][20];
 	int indice = 0;
+	int isAndOrOrFlag = -1;
 	char * table;
 	int conditionLength = 0;
 	char argument1[10][30];
@@ -150,7 +151,8 @@ fieldget: GET FIELD {
 	| fieldget COMMA FIELD
 	{
 		strcpy(auxillary[indice], $3);
-		indice++;printf("\n Get2 ");
+		indice++;
+		printf("\n Get2 ");
 	}
 	| GET error
 	{
@@ -173,10 +175,12 @@ fieldget: GET FIELD {
 
 condition: check AND condition
 	{
+		isAndOrOrFlag = 0;
 		printf("\n AND command;");
 	}
 	| check OR condition
 	{
+		isAndOrOrFlag = 1;
 		printf("\n OR command;");
 	}
 	| check
@@ -297,6 +301,7 @@ int main()
 	char * field1 =  malloc(sizeof(char)* 80);
 	char * field2 =  malloc(sizeof(char)* 80);
 	int p = 0;
+	int conditionLoop = 0;
 
 	while(1)
 	{
@@ -343,7 +348,7 @@ int main()
 		{
 			tEmployee ss1 = getEmployeeFromListByIndex (l, k);
 			field1 = getField(argument1[0],ss1); // Get required field
-			// printf(">>> %s", field1);
+			// printf("\n >>>1 %s", field1);
 
 			// Some error, exiting
 			if ((!strncmp(field1,argument1[0],strlen(field1))) || !strncmp(argument1[0],"\"",1))
@@ -352,38 +357,53 @@ int main()
 				k = length;
 			}
 
-			for(p = 0; p < length;p++)
+			for(p = 0; p < length; p++)
 			{
 				// Second list
 				tEmployee ss2 = getEmployeeFromListByIndex (l, p);
-				field2 = getField(argument2[0],ss2);
+				for(conditionLoop = 0; conditionLoop< conditionLength; conditionLoop++)
+				{
+					field1 = getField(argument1[conditionLoop],ss1); // Get required field
 
-				if ((!strncmp(field2,argument2[0],strlen(field2)) && k != length)|| !strncmp(argument2[0],"\"",1))
-				{
-					p = length;
-					ss2 = ss1;
-				}
+					field2 = getField(argument2[conditionLoop],ss2);
+					// printf("\n >>>2 %s", field2);
 
-				if (!strncmp(operator[0],"=",1))
-				{
-					len = max(strlen(field1),strlen(field2));
-					printFlag = !strncmp(field1,field2,len);
-				}
-				else
-				{
-					atoi1 = atoi(field1);
-					atoi2 = atoi(field2);
-					if (atoi1 != NULL && atoi2 != NULL)
-						if (!strncmp(operator[0],">",1))
-							printFlag = atoi1 > atoi2;
-						if (!strncmp(operator[0],"<",1))
-							printFlag = atoi1 < atoi2;
+					if ((!strncmp(field2,argument2[conditionLoop],strlen(field2)) && k != length)|| !strncmp(argument2[conditionLoop],"\"",1))
+					{
+						p = length;
+						ss2 = ss1;
+					}
+
+					// strncmp returns an integral value indicating the relationship between the strings:
+					if (!strncmp(operator[conditionLoop],"=",1))
+					{
+						len = max(strlen(field1),strlen(field2));
+						printFlag = !strncmp(field1,field2,len);
+					}
+					else
+					{
+						atoi1 = atoi(field1);
+						atoi2 = atoi(field2);
+						if (atoi1 != NULL && atoi2 != NULL)
+							if (!strncmp(operator[conditionLoop],">",1))
+								printFlag = atoi1 > atoi2;
+							if (!strncmp(operator[conditionLoop],"<",1))
+								printFlag = atoi1 < atoi2;
+					}
+					if(!printFlag && isAndOrOrFlag == 0)
+					{
+						break;
+					}
+					else if(printFlag && isAndOrOrFlag == 1)
+					{
+						break;
+					}
 				}
 
 				if (printFlag)
 				{
 					if (indice == 0)
-						printf("%d %s %s %s %s", ss2->indexNumber, ss2->ename, ss2->eage, ss2->eaddress, ss2->salary);
+						printf("\n %d %s %s %s %s", ss2->indexNumber, ss2->ename, ss2->eage, ss2->eaddress, ss2->salary);
 					else
 					{
 						i = 0;
@@ -406,8 +426,13 @@ int main()
 				}
 			}
 		}
+		conditionLength = 0;
 	}
 	return 0;
 }
 
-void yyerror (char const *message) { if (strncmp(message,"syntax error",12))fprintf (stderr, "%s\n", message);}
+void yyerror (char const *message)
+{
+	if (strncmp(message,"syntax error",12))
+		fprintf (stderr, "%s\n", message);
+}
