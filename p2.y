@@ -11,9 +11,10 @@
 	char auxillary[10][20];
 	int indice = 0;
 	char * table;
-	char * argument1;
-	char * argument2;
-	char * operator;
+	int conditionLength = 0;
+	char argument1[10][30];
+	char argument2[10][30];
+	char operator[10][30];
 	char * errorFlag;
 	char buffer[2];
 	int check = 0;
@@ -141,11 +142,11 @@ getasterisk: GET ASTERISK {printf("\n |asterisk| command - ");}
 		}
 ;
 
-fieldget: GET FIELD 	{
-								strcpy(auxillary[indice], $2);
-								indice++;
-								printf("\n Get");
-							}
+fieldget: GET FIELD {
+						strcpy(auxillary[indice], $2);
+						indice++;
+						printf("\n Get");
+					}
 	| fieldget COMMA FIELD
 	{
 		strcpy(auxillary[indice], $3);
@@ -187,9 +188,10 @@ condition: check AND condition
 check:	argument OPERATOR argument
 	{
 		printf("\n Reaching commands;");
-		argument1 = $1;
-		operator = $2;
-		argument2 = $3;
+		strcpy(argument1[conditionLength], $1);
+		strcpy(operator[conditionLength], $2);
+		strcpy(argument2[conditionLength], $3);
+		conditionLength++;
 	}
 ;
 
@@ -246,8 +248,6 @@ tEmployeeList parseDB()
 	}
 	return employeeList;
 }
-
-
 
 char * getField(char * argument, tEmployee tE)
 {
@@ -321,25 +321,34 @@ int main()
 			printf("\n Field %d -> %s", i, auxillary[i]);
 		}
 		printf("\n Table -> %s",table);
-		printf("\n Argument_1 -> %s",argument1);
-		printf("\n Argument_2 -> %s",argument2);
-		printf("\n Argument_Opr -> %s\n\n",operator);
 
+		// No conditions
 		if(where)
 		{
-			argument1 = "1";
-			argument2 = "1";
-			operator = "=";
+			strcpy(argument1,"1");
+			strcpy(argument2,"1");
+			strcpy(operator, "=");
+			conditionLength++;
+		}
+
+		for (i = 0; i < conditionLength; i++)
+		{
+			printf("\n Argument_1 -> %s",argument1[i]);
+			printf("\n Argument_2 -> %s",argument2[i]);
+			printf("\n Argument_Opr -> %s\n\n",operator[i]);
 		}
 
 		// Iterate for every single employee
 		for (k=0; k < length; k++)
 		{
 			tEmployee ss1 = getEmployeeFromListByIndex (l, k);
-			field1 = getField(argument1,ss1); // Get required field
+			field1 = getField(argument1[0],ss1); // Get required field
+			// printf(">>> %s", field1);
 
-			if ((!strncmp(field1,argument1,strlen(field1))) || !strncmp(argument1,"\"",1))
+			// Some error, exiting
+			if ((!strncmp(field1,argument1[0],strlen(field1))) || !strncmp(argument1[0],"\"",1))
 			{
+				printf("\n ERROR: Condition error;");
 				k = length;
 			}
 
@@ -347,15 +356,15 @@ int main()
 			{
 				// Second list
 				tEmployee ss2 = getEmployeeFromListByIndex (l, p);
-				field2 = getField(argument2,ss2);
+				field2 = getField(argument2[0],ss2);
 
-				if ((!strncmp(field2,argument2,strlen(field2)) && k != length)|| !strncmp(argument2,"\"",1))
+				if ((!strncmp(field2,argument2[0],strlen(field2)) && k != length)|| !strncmp(argument2[0],"\"",1))
 				{
 					p = length;
 					ss2 = ss1;
 				}
 
-				if (!strncmp(operator,"=",1))
+				if (!strncmp(operator[0],"=",1))
 				{
 					len = max(strlen(field1),strlen(field2));
 					printFlag = !strncmp(field1,field2,len);
@@ -365,9 +374,9 @@ int main()
 					atoi1 = atoi(field1);
 					atoi2 = atoi(field2);
 					if (atoi1 != NULL && atoi2 != NULL)
-						if (!strncmp(operator,">",1))
+						if (!strncmp(operator[0],">",1))
 							printFlag = atoi1 > atoi2;
-						if (!strncmp(operator,"<",1))
+						if (!strncmp(operator[0],"<",1))
 							printFlag = atoi1 < atoi2;
 				}
 
