@@ -266,6 +266,31 @@ updatetable: UPDATE RECORD IN TABLE SET FIELD TO argument WHERE condition SEMICO
 %%
 //Build Employee List
 
+void storeDB(tEmployeeList empl)
+{
+	int k = 0;
+	FILE *femp = fopen("EMP1.txt", "w" );
+	if (!femp)
+	{
+		printf("\n Could not open file EMP1 for writing.");
+		fclose(femp);
+		exit(0);
+	}
+
+	int lengthEmp = lengthEmployeeList(empl);
+	for (k=0; k < lengthEmp; k++)
+	{
+		tEmployee ss1 = getEmployeeFromListByIndex (empl, k);
+		fprintf(femp, "%d,",ss1->indexNumber);
+		fprintf(femp, "%s,",ss1->ename);
+		fprintf(femp, "%s,",ss1->eage);
+		fprintf(femp, "%s,",ss1->eaddress);
+		fprintf(femp, "%s",ss1->salary);
+		fprintf(femp, "\n");
+	}
+	fclose(femp);
+}
+
 tEmployeeList parseDB()
 {
 	employeeList = createEmployeeList (); // Assign memory
@@ -650,6 +675,7 @@ int main()
 					}
 				}
 			}
+			storeDB(empl);
 		}
 		getFlag = 0;
 		insertFlag = 0;
