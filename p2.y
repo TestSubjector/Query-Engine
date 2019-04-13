@@ -11,6 +11,7 @@
 	tEmployeeList employeeList;
 	tDepartmentList departmentList;
 	char auxillary[10][20];
+	char * insertRecord;
 	int indice = 0;
 	int isAndOrOrFlag = -1;
 	char * table;
@@ -22,6 +23,11 @@
 	char buffer[2];
 	int check = 0;
 	int where = 0;
+	int getFlag = 0;
+	int insertFlag = 0;
+	int deleteFlag = 0;
+	int updateFlag = 0;
+	char * remnant;
 
 %}
 /*
@@ -37,33 +43,38 @@
 
 %token GET FROM WHERE AND OR INSERT RECORD UPDATE IN DELETE SET TO INTO
 %token <valString> FIELD TABLE OPERATOR EOFF NUMBERS COMMA SEMICOLON ASTERISK STRINGVALUE WORD SINGLEQUOTES
-%type <valString> fieldget fromtable getfrom wheretable wherefrom argument condition check
+%type <valString> fieldget fromtable getfrom wheretable wherefrom argument condition check getrecord entry
 %start S
 %%
 
 S:  wheretable
 	{
 		printf("\n Reached wheretable\n");
+		getFlag = 1;
 		check = 0;
 	}
 	|fromtable
 	{
 		printf("\n Reached fromtable\n");
+		getFlag = 1;
 		check = 0;
 	}
 	| updatetable
 	{
 		printf("\n Reached updatetable\n");
+		updateFlag = 1;
 		check = 0;
 	}
 	| inserttable
 	{
 		printf("\n Reached inserttable\n");
+		insertFlag = 1;
 		check = 0;
 	}
 	| deletetable
 	{
 		printf("\n Reached deletetable\n");
+		deleteFlag = 1;
 		check = 0;
 	}
 ;
@@ -216,7 +227,28 @@ check:	argument OPERATOR argument
 	}
 ;
 
-inserttable: INSERT RECORD entry INTO TABLE {printf("\n Matches;");}
+inserttable: getrecord entry INTO TABLE SEMICOLON
+	{
+		table = $4;
+		printf("\n Matches;");
+	}
+
+;
+
+getrecord: INSERT RECORD
+	{
+		printf("\n Received INSERT RECORD command;");
+	}
+;
+
+entry: argument COMMA argument
+	{
+		insertRecord = malloc(sizeof(char)* 80);
+		strcpy(insertRecord, $1);
+		printf("\n Inserting into Employee table1 %s", $1);
+		strcpy(remnant, $3);
+		printf("\n Inserting into Employee table1 %s", $3);
+	}
 ;
 
 deletetable: DELETE RECORD FROM TABLE WHERE condition SEMICOLON
@@ -225,11 +257,6 @@ deletetable: DELETE RECORD FROM TABLE WHERE condition SEMICOLON
 updatetable: UPDATE RECORD IN TABLE SET FIELD TO argument WHERE condition SEMICOLON
 ;
 
-entry: argument COMMA argument COMMA argument COMMA argument
-	{
-		printf("\n Inserting into table");
-	}
-;
 
 /*
 ****************************************************************************
@@ -396,7 +423,7 @@ char * getFieldDept(char * argument, tDepartment tE)
 int main()
 {
 	errorFlag = malloc(sizeof(char)* 80);
-
+	remnant = malloc(sizeof(char)* 80);
 	char * field;
 	int lengthEmp;
 	int lengthDept;
@@ -421,208 +448,213 @@ int main()
 			return 0 ;
 		}
 
-		// Get all contents of file
-		tEmployeeList empl = parseDB();
-		// Get total lengthEmp of entries
-		lengthEmp = lengthEmployeeList(empl);
-
-		tDepartmentList deptl = parseDBDept();
-		lengthDept = lengthDepartmentList(deptl);
-
-
-		// This will read the command, indice gives lengthEmp
-		int i = 0;
-		for (i = 0; i < indice; i++)
+		// For get command
+		if (getFlag == 1 || (insertFlag == 0 && deleteFlag == 0 && updateFlag == 0))
 		{
-			printf("\n Field %d -> %s", i, auxillary[i]);
-		}
-		printf("\n Table -> %s",table);
+			// Get all contents of file
+			tEmployeeList empl = parseDB();
+			// Get total lengthEmp of entries
+			lengthEmp = lengthEmployeeList(empl);
 
-		// No conditions
-		if(where)
-		{
-			strcpy(argument1,"1");
-			strcpy(argument2,"1");
-			strcpy(operator, "=");
-			conditionLength++;
-		}
+			tDepartmentList deptl = parseDBDept();
+			lengthDept = lengthDepartmentList(deptl);
 
-		for (i = 0; i < conditionLength; i++)
-		{
-			printf("\n Argument_1 -> %s",argument1[i]);
-			printf("\n Argument_2 -> %s",argument2[i]);
-			printf("\n Argument_Opr -> %s\n\n",operator[i]);
-		}
-
-		// printf("\n\n ^^^^^^ the table is %s", table);
-		// Iterate for every single employee
-		if(strcmp(table, "Employee")==0)
-		{
-			for (k=0; k < lengthEmp; k++)
+			// This will read the command, indice gives lengthEmp
+			int i = 0;
+			for (i = 0; i < indice; i++)
 			{
-				tEmployee ss1 = getEmployeeFromListByIndex (empl, k);
-				field1 = getField(argument1[0],ss1); // Get required field
-				// printf("\n >>>1 %s", field1);
+				printf("\n Field %d -> %s", i, auxillary[i]);
+			}
+			printf("\n Table -> %s",table);
 
-				// Some error, exiting
-				if ((!strncmp(field1,argument1[0],strlen(field1))) || !strncmp(argument1[0],"\"",1))
-				{
-					printf("\n ERROR: Condition error;");
-					k = lengthEmp;
-				}
+			// No conditions
+			if(where)
+			{
+				strcpy(argument1,"1");
+				strcpy(argument2,"1");
+				strcpy(operator, "=");
+				conditionLength++;
+			}
 
-				for(p = 0; p < lengthEmp; p++)
+			for (i = 0; i < conditionLength; i++)
+			{
+				printf("\n Argument_1 -> %s",argument1[i]);
+				printf("\n Argument_2 -> %s",argument2[i]);
+				printf("\n Argument_Opr -> %s\n\n",operator[i]);
+			}
+			// Iterate for every single employee
+			if(strcmp(table, "Employee")==0)
+			{
+				for (k=0; k < lengthEmp; k++)
 				{
-					// Second list
-					tEmployee ss2 = getEmployeeFromListByIndex (empl, p);
-					for(conditionLoop = 0; conditionLoop< conditionLength; conditionLoop++)
+					tEmployee ss1 = getEmployeeFromListByIndex (empl, k);
+					field1 = getField(argument1[0],ss1); // Get required field
+					// printf("\n >>>1 %s", field1);
+
+					// Some error, exiting
+					if ((!strncmp(field1,argument1[0],strlen(field1))) || !strncmp(argument1[0],"\"",1))
 					{
-						field1 = getField(argument1[conditionLoop],ss1); // Get required field
-						field2 = getField(argument2[conditionLoop],ss2);
-						// printf("\n >>>2 %s %s",field1, field2);
-
-						if ((!strncmp(field2,argument2[conditionLoop],strlen(field2)) && k != lengthEmp)|| !strncmp(argument2[conditionLoop],"\"",1))
-						{
-							p = lengthEmp;
-							ss2 = ss1;
-						}
-
-						// strncmp returns an integral value indicating the relationship between the strings:
-						if (!strncmp(operator[conditionLoop],"=",1))
-						{
-							len = max(strlen(field1),strlen(field2));
-							printFlag = !strncmp(field1,field2,len);
-						}
-						else
-						{
-							atoi1 = atoi(field1);
-							atoi2 = atoi(field2);
-							if (atoi1 != NULL && atoi2 != NULL)
-								if (!strncmp(operator[conditionLoop],">",1))
-									printFlag = atoi1 > atoi2;
-								if (!strncmp(operator[conditionLoop],"<",1))
-									printFlag = atoi1 < atoi2;
-						}
-						if(!printFlag && isAndOrOrFlag == 0)
-						{
-							break;
-						}
-						else if(printFlag && isAndOrOrFlag == 1)
-						{
-							break;
-						}
+						printf("\n ERROR: Condition error;");
+						k = lengthEmp;
 					}
 
-					if (printFlag)
+					for(p = 0; p < lengthEmp; p++)
 					{
-						if (indice == 0)
-							printf("\n %d %s %s %s %s", ss2->indexNumber, ss2->ename, ss2->eage, ss2->eaddress, ss2->salary);
-						else
+						// Second list
+						tEmployee ss2 = getEmployeeFromListByIndex (empl, p);
+						for(conditionLoop = 0; conditionLoop< conditionLength; conditionLoop++)
 						{
-							i = 0;
-							for (i=0; i< indice; i++)
+							field1 = getField(argument1[conditionLoop],ss1); // Get required field
+							field2 = getField(argument2[conditionLoop],ss2);
+							// printf("\n >>>2 %s %s",field1, field2);
+
+							if ((!strncmp(field2,argument2[conditionLoop],strlen(field2)) && k != lengthEmp)|| !strncmp(argument2[conditionLoop],"\"",1))
 							{
-								field = auxillary[i];
-								if(!strncmp(field,"indexNumber",10))
-									printf(" %d ",ss2->indexNumber);
-								if(!strncmp(field,"ename",6))
-									printf(" %s ",ss2->ename);
-								if(!strncmp(field,"eage",9))
-									printf(" %s ",ss2->eage);
-								if(!strncmp(field,"salary",4))
-									printf(" %s ",ss2->salary);
-								if(!strncmp(field,"eaddress",6))
-									printf(" %s ",ss2->eaddress);
+								p = lengthEmp;
+								ss2 = ss1;
+							}
+
+							// strncmp returns an integral value indicating the relationship between the strings:
+							if (!strncmp(operator[conditionLoop],"=",1))
+							{
+								len = max(strlen(field1),strlen(field2));
+								printFlag = !strncmp(field1,field2,len);
+							}
+							else
+							{
+								atoi1 = atoi(field1);
+								atoi2 = atoi(field2);
+								if (atoi1 != NULL && atoi2 != NULL)
+									if (!strncmp(operator[conditionLoop],">",1))
+										printFlag = atoi1 > atoi2;
+									if (!strncmp(operator[conditionLoop],"<",1))
+										printFlag = atoi1 < atoi2;
+							}
+							if(!printFlag && isAndOrOrFlag == 0)
+							{
+								break;
+							}
+							else if(printFlag && isAndOrOrFlag == 1)
+							{
+								break;
 							}
 						}
-					printf("\n");
+
+						if (printFlag)
+						{
+							if (indice == 0)
+								printf("\n %d %s %s %s %s", ss2->indexNumber, ss2->ename, ss2->eage, ss2->eaddress, ss2->salary);
+							else
+							{
+								i = 0;
+								for (i=0; i< indice; i++)
+								{
+									field = auxillary[i];
+									if(!strncmp(field,"indexNumber",10))
+										printf(" %d ",ss2->indexNumber);
+									if(!strncmp(field,"ename",6))
+										printf(" %s ",ss2->ename);
+									if(!strncmp(field,"eage",9))
+										printf(" %s ",ss2->eage);
+									if(!strncmp(field,"salary",4))
+										printf(" %s ",ss2->salary);
+									if(!strncmp(field,"eaddress",6))
+										printf(" %s ",ss2->eaddress);
+								}
+							}
+						printf("\n");
+						}
+					}
+				}
+			}
+			else
+			{
+				for (k=0; k < lengthDept; k++)
+				{
+					tDepartment ss1 = getDepartmentFromListByIndex (deptl, k);
+					field1 = getFieldDept(argument1[0],ss1); // Get required field
+					// printf(">>> %s", field1);
+
+					// Some error, exiting
+					if ((!strncmp(field1,argument1[0],strlen(field1))) || !strncmp(argument1[0],"\"",1))
+					{
+						printf("\n ERROR: Condition error;");
+						k = lengthDept;
+					}
+
+					for(p = 0; p < lengthDept;p++)
+					{
+						// Second list
+						tDepartment ss2 = getDepartmentFromListByIndex (deptl, p);
+						for(conditionLoop = 0; conditionLoop< conditionLength; conditionLoop++)
+						{
+							field1 = getFieldDept(argument1[conditionLoop],ss1); // Get required field
+							field2 = getFieldDept(argument2[conditionLoop],ss2);
+							// printf("\n >>>2 %s %s",field1, field2);
+
+							if ((!strncmp(field2,argument2[conditionLoop],strlen(field2)) && k != lengthDept)|| !strncmp(argument2[conditionLoop],"\"",1))
+							{
+								p = lengthDept;
+								ss2 = ss1;
+							}
+
+							if (!strncmp(operator[conditionLoop],"=",1))
+							{
+								len = max(strlen(field1),strlen(field2));
+								printFlag = !strncmp(field1,field2,len);
+								// printf("\n Printflag1 is %s %s", field1, field2);
+							}
+							else
+							{
+								atoi1 = atoi(field1);
+								atoi2 = atoi(field2);
+								if (atoi1 != NULL && atoi2 != NULL)
+									if (!strncmp(operator[conditionLoop],">",1))
+										printFlag = atoi1 > atoi2;
+									if (!strncmp(operator[conditionLoop],"<",1))
+										printFlag = atoi1 < atoi2;
+							}
+							if(!printFlag && isAndOrOrFlag == 0)
+							{
+								break;
+							}
+							else if(printFlag && isAndOrOrFlag == 1)
+							{
+								break;
+							}
+						}
+						// printf("\n Printflag2 is %d", printFlag);
+						// printf("\n>>>1 %s", ss2->dlocation);
+						if (printFlag)
+						{
+							if (indice == 0)
+								printf("%s %s %s", ss2->dnum, ss2->dname, ss2->dlocation);
+							else
+							{
+								i = 0;
+								for (i=0; i< indice; i++)
+								{
+									field = auxillary[i];
+									// if(!strncmp(field,"indexNumber",10))
+									// 	printf(" %d ",ss2->indexNumber);
+									if(!strncmp(field,"dnum",6))
+										printf(" %s ",ss2->dnum);
+									if(!strncmp(field,"dname",9))
+										printf(" %s ",ss2->dname);
+									if(!strncmp(field,"dlocation",6))
+										printf(" %s ",ss2->dlocation);
+								}
+							}
+						printf("\n");
+						}
 					}
 				}
 			}
 		}
-		else
-		{
-			for (k=0; k < lengthDept; k++)
-			{
-				tDepartment ss1 = getDepartmentFromListByIndex (deptl, k);
-				field1 = getFieldDept(argument1[0],ss1); // Get required field
-				// printf(">>> %s", field1);
-
-				// Some error, exiting
-				if ((!strncmp(field1,argument1[0],strlen(field1))) || !strncmp(argument1[0],"\"",1))
-				{
-					printf("\n ERROR: Condition error;");
-					k = lengthDept;
-				}
-
-				for(p = 0; p < lengthDept;p++)
-				{
-					// Second list
-					tDepartment ss2 = getDepartmentFromListByIndex (deptl, p);
-					for(conditionLoop = 0; conditionLoop< conditionLength; conditionLoop++)
-					{
-						field1 = getFieldDept(argument1[conditionLoop],ss1); // Get required field
-						field2 = getFieldDept(argument2[conditionLoop],ss2);
-						// printf("\n >>>2 %s %s",field1, field2);
-
-						if ((!strncmp(field2,argument2[conditionLoop],strlen(field2)) && k != lengthDept)|| !strncmp(argument2[conditionLoop],"\"",1))
-						{
-							p = lengthDept;
-							ss2 = ss1;
-						}
-
-						if (!strncmp(operator[conditionLoop],"=",1))
-						{
-							len = max(strlen(field1),strlen(field2));
-							printFlag = !strncmp(field1,field2,len);
-							// printf("\n Printflag1 is %s %s", field1, field2);
-						}
-						else
-						{
-							atoi1 = atoi(field1);
-							atoi2 = atoi(field2);
-							if (atoi1 != NULL && atoi2 != NULL)
-								if (!strncmp(operator[conditionLoop],">",1))
-									printFlag = atoi1 > atoi2;
-								if (!strncmp(operator[conditionLoop],"<",1))
-									printFlag = atoi1 < atoi2;
-						}
-						if(!printFlag && isAndOrOrFlag == 0)
-						{
-							break;
-						}
-						else if(printFlag && isAndOrOrFlag == 1)
-						{
-							break;
-						}
-					}
-					// printf("\n Printflag2 is %d", printFlag);
-					// printf("\n>>>1 %s", ss2->dlocation);
-					if (printFlag)
-					{
-						if (indice == 0)
-							printf("%s %s %s", ss2->dnum, ss2->dname, ss2->dlocation);
-						else
-						{
-							i = 0;
-							for (i=0; i< indice; i++)
-							{
-								field = auxillary[i];
-								// if(!strncmp(field,"indexNumber",10))
-								// 	printf(" %d ",ss2->indexNumber);
-								if(!strncmp(field,"dnum",6))
-									printf(" %s ",ss2->dnum);
-								if(!strncmp(field,"dname",9))
-									printf(" %s ",ss2->dname);
-								if(!strncmp(field,"dlocation",6))
-									printf(" %s ",ss2->dlocation);
-							}
-						}
-					printf("\n");
-					}
-				}
-			}
-		}
+		getFlag = 0;
+		insertFlag = 0;
+		deleteFlag = 0;
+		updateFlag = 0;
 		conditionLength = 0;
 	}
 	return 0;
