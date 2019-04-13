@@ -291,6 +291,34 @@ void storeDB(tEmployeeList empl)
 	fclose(femp);
 }
 
+void storeDBInsert(tEmployeeList empl)
+{
+	int k = 0;
+	FILE *femp = fopen("EMP1.txt", "w" );
+	if (!femp)
+	{
+		printf("\n Could not open file EMP1 for writing.");
+		fclose(femp);
+		exit(0);
+	}
+
+	int lengthEmp = lengthEmployeeList(empl);
+	for (k=0; k < lengthEmp; k++)
+	{
+		tEmployee ss1 = getEmployeeFromListByIndex (empl, k);
+		fprintf(femp, "%d,",ss1->indexNumber);
+		fprintf(femp, "%s,",ss1->ename);
+		fprintf(femp, "%s,",ss1->eage);
+		fprintf(femp, "%s,",ss1->eaddress);
+		fprintf(femp, "%s",ss1->salary);
+		fprintf(femp, "\n");
+	}
+	fprintf(femp, "%d,", lengthEmp + 1);
+	fprintf(femp, "%s,", insertRecord);
+	fprintf(femp, "%s", remnant);
+	fclose(femp);
+}
+
 tEmployeeList parseDB()
 {
 	employeeList = createEmployeeList (); // Assign memory
@@ -675,7 +703,21 @@ int main()
 					}
 				}
 			}
-			storeDB(empl);
+
+		}
+		else if(insertFlag == 1)
+		{
+			printf("\n Insert Operation in progress");
+			tEmployeeList empl = parseDB();
+			storeDBInsert(empl);
+		}
+		else if(deleteFlag == 1)
+		{
+			;
+		}
+		else if(updateFlag == 1)
+		{
+			;
 		}
 		getFlag = 0;
 		insertFlag = 0;
