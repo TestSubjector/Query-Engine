@@ -4,7 +4,7 @@
 %}
 
 table Employee|Department
-field indexNumber|eaddress|salary|eage|ename
+field indexNumber|eaddress|salary|eage|ename|dnum|dname|dlocation
 numbers [0-9]+
 operator <|>|=
 comma \,
@@ -15,11 +15,19 @@ singlequotes \'
 %%
   {}
 <<EOF>> {return EOFF;}
-GET {return GET;}
-FROM {return FROM;}
-WHERE {return WHERE;}
-AND {return AND;}
-OR {return OR;}
+GET	{return GET;}
+FROM	{return FROM;}
+WHERE	{return WHERE;}
+AND	{return AND;}
+OR 	{return OR;}
+INSERT 	{return INSERT; }
+RECORD 	{return RECORD; }
+UPDATE	{return UPDATE; }
+IN	{return IN; }
+DELETE	{return DELETE; }
+SET	{return SET; }
+TO	{return TO; }
+INTO {return INTO; }
 
 {table} {
 			yylval.valString = strdup(yytext);
