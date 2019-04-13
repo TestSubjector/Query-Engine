@@ -28,6 +28,7 @@
 	int deleteFlag = 0;
 	int updateFlag = 0;
 	char * remnant;
+	char * updateStore;
 
 %}
 /*
@@ -217,7 +218,7 @@ condition: check AND condition
 	}
 ;
 
-check:	argument OPERATOR argument
+check: argument OPERATOR argument
 	{
 		printf("\n Reaching commands;");
 		strcpy(argument1[conditionLength], $1);
@@ -230,7 +231,7 @@ check:	argument OPERATOR argument
 inserttable: getrecord entry INTO TABLE SEMICOLON
 	{
 		table = $4;
-		printf("\n Matches;");
+		printf("\n Matches for inserttable;");
 	}
 
 ;
@@ -252,9 +253,19 @@ entry: argument COMMA argument
 ;
 
 deletetable: DELETE RECORD FROM TABLE WHERE condition SEMICOLON
+	{
+		table = $4;
+		printf("\n Matches for deletetable;");
+	}
 ;
 
 updatetable: UPDATE RECORD IN TABLE SET FIELD TO argument WHERE condition SEMICOLON
+	{
+		table = $4;
+		strcpy(auxillary[indice], $6);
+		indice++;
+		strcpy(updateStore, $8);
+	}
 ;
 
 
@@ -477,6 +488,7 @@ int main()
 {
 	errorFlag = malloc(sizeof(char)* 80);
 	remnant = malloc(sizeof(char)* 80);
+	updateStore = malloc(sizeof(char)* 80);
 	char * field;
 	int lengthEmp;
 	int lengthDept;
@@ -713,7 +725,105 @@ int main()
 		}
 		else if(deleteFlag == 1)
 		{
-			;
+			printf("\n Delete Operation in progress");
+			tEmployeeList empl = parseDB();
+			// Get total lengthEmp of entries
+			lengthEmp = lengthEmployeeList(empl);
+			int i = 0;
+			for (i = 0; i < indice; i++)
+			{
+				printf("\n Field %d -> %s", i, auxillary[i]);
+			}
+			printf("\n Table -> %s",table);
+
+			// No conditions
+			if(where)
+			{
+				strcpy(argument1,"1");
+				strcpy(argument2,"1");
+				strcpy(operator, "=");
+				conditionLength++;
+			}
+
+			for (i = 0; i < conditionLength; i++)
+			{
+				printf("\n Argument_1 -> %s",argument1[i]);
+				printf("\n Argument_2 -> %s",argument2[i]);
+				printf("\n Argument_Opr -> %s\n\n",operator[i]);
+			}
+			// Iterate for every single employee
+			if(strcmp(table, "Employee")==0)
+			{
+				FILE *femp = fopen("EMP.txt", "w" );
+				for (k=0; k < lengthEmp; k++)
+				{
+					tEmployee ss1 = getEmployeeFromListByIndex (empl, k);
+					field1 = getField(argument1[0],ss1); // Get required field
+					// printf("\n >>>1 %s", field1);
+
+					// Some error, exiting
+					if ((!strncmp(field1,argument1[0],strlen(field1))) || !strncmp(argument1[0],"\"",1))
+					{
+						printf("\n ERROR: Condition error;");
+						k = lengthEmp;
+					}
+
+					for(p = 0; p < lengthEmp; p++)
+					{
+						// Second list
+						tEmployee ss2 = getEmployeeFromListByIndex (empl, p);
+						for(conditionLoop = 0; conditionLoop< conditionLength; conditionLoop++)
+						{
+							field1 = getField(argument1[conditionLoop],ss1); // Get required field
+							field2 = getField(argument2[conditionLoop],ss2);
+							// printf("\n >>>2 %s %s",field1, field2);
+
+							if ((!strncmp(field2,argument2[conditionLoop],strlen(field2)) && k != lengthEmp)|| !strncmp(argument2[conditionLoop],"\"",1))
+							{
+								p = lengthEmp;
+								ss2 = ss1;
+							}
+
+							// strncmp returns an integral value indicating the relationship between the strings:
+							if (!strncmp(operator[conditionLoop],"=",1))
+							{
+								len = max(strlen(field1),strlen(field2));
+								printFlag = !strncmp(field1,field2,len);
+							}
+							else
+							{
+								atoi1 = atoi(field1);
+								atoi2 = atoi(field2);
+								if (atoi1 != NULL && atoi2 != NULL)
+									if (!strncmp(operator[conditionLoop],">",1))
+										printFlag = atoi1 > atoi2;
+									if (!strncmp(operator[conditionLoop],"<",1))
+										printFlag = atoi1 < atoi2;
+							}
+							if(!printFlag && isAndOrOrFlag == 0)
+							{
+								break;
+							}
+							else if(printFlag && isAndOrOrFlag == 1)
+							{
+								break;
+							}
+						}
+
+						if (!printFlag)
+						{
+
+							fprintf(femp, "%d,",ss2->indexNumber);
+							fprintf(femp, "%s,",ss2->ename);
+							fprintf(femp, "%s,",ss2->eage);
+							fprintf(femp, "%s,",ss2->eaddress);
+							fprintf(femp, "%s",ss2->salary);
+							fprintf(femp, "\n");
+						}
+					}
+				}
+				fclose(femp);
+			}
 		}
 		else if(updateFlag == 1)
 		{
@@ -725,6 +835,11 @@ int main()
 		updateFlag = 0;
 		conditionLength = 0;
 	}
+	free(errorFlag);
+	free(remnant);
+	free(updateStore);
+	free(field1);
+	free(field2);
 	return 0;
 }
 
