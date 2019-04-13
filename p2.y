@@ -29,6 +29,8 @@
 	int updateFlag = 0;
 	char * remnant;
 	char * updateStore;
+	char deptUpdate[10][100];
+	int deptUpdateIndex = 0;
 
 %}
 /*
@@ -250,6 +252,21 @@ entry: argument COMMA argument
 		strcpy(remnant, $3);
 		printf("\n Inserting into Employee table1 %s", $3);
 	}
+	| argument COMMA argument COMMA argument
+	{
+		strcpy(deptUpdate[deptUpdateIndex], $1);
+		deptUpdateIndex++;
+		printf("\n 123 %s", $1);
+		strcpy(deptUpdate[deptUpdateIndex], $3);
+		deptUpdateIndex++;
+		printf("\n 123 %s", $3);
+		strcpy(deptUpdate[deptUpdateIndex], $5);
+		deptUpdateIndex++;
+		printf("\n 123 %s", $5);
+		// strcpy(deptUpdate[deptUpdateIndex], $7);
+		// deptUpdateIndex++;
+
+	}
 ;
 
 deletetable: DELETE RECORD FROM TABLE WHERE condition SEMICOLON
@@ -302,6 +319,29 @@ void storeDB(tEmployeeList empl)
 	fclose(femp);
 }
 
+void storeDBDept(tDepartmentList deptl)
+{
+	int k = 0;
+	FILE *femp = fopen("DEPT1.txt", "w" );
+	if (!femp)
+	{
+		printf("\n Could not open file Dept1 for writing.");
+		fclose(femp);
+		exit(0);
+	}
+	int lengthDept = lengthDepartmentList(deptl);
+	for (k=0; k < lengthDept; k++)
+	{
+		tDepartment ss1 = getDepartmentFromListByIndex (deptl, k);
+		fprintf(femp, "%d,",ss1->indexNumber);
+		fprintf(femp, "%s,",ss1->dnum);
+		fprintf(femp, "%s,",ss1->dname);
+		fprintf(femp, "%s,",ss1->dlocation);
+		fprintf(femp, "\n");
+	}
+	fclose(femp);
+}
+
 void storeDBInsert(tEmployeeList empl)
 {
 	int k = 0;
@@ -329,6 +369,34 @@ void storeDBInsert(tEmployeeList empl)
 	fprintf(femp, "%s", remnant);
 	fclose(femp);
 }
+
+void storeDBInsertDept(tDepartmentList deptl) //new function
+{
+    int k = 0;
+    FILE *fdept = fopen("DEPT1.txt", "w" );
+    if (!fdept)
+    {
+        printf("\n Could not open file DEPT for writing.");
+        fclose(fdept);
+        exit(0);
+    }
+
+    int lengthDept = lengthDepartmentList(deptl);
+    for (k=0; k < lengthDept; k++)
+    {
+        tDepartment ss1 = getDepartmentFromListByIndex (deptl, k);
+        fprintf(fdept, "%d,",ss1->indexNumber);
+        fprintf(fdept, "%s,",ss1->dnum);
+        fprintf(fdept, "%s,",ss1->dname);
+        fprintf(fdept, "%s,",ss1->dlocation);
+        fprintf(fdept, "\n");
+    }
+    fprintf(fdept, "%d,", lengthDept + 1);
+    fprintf(fdept, "%s,", insertRecord);
+    fprintf(fdept, "%s", remnant);
+    fclose(fdept);
+}
+
 
 tEmployeeList parseDB()
 {
@@ -715,20 +783,241 @@ int main()
 					}
 				}
 			}
-
 		}
 		else if(insertFlag == 1)
 		{
-			printf("\n Insert Operation in progress");
-			tEmployeeList empl = parseDB();
-			storeDBInsert(empl);
+			if(strcmp(table,"Employee")==0)
+            {
+                printf("\n Insert Operation in progress");
+                tEmployeeList empl = parseDB();
+                storeDBInsert(empl);
+            }
+            else
+			{
+                 printf("\n Insert Operation in progress");
+                tDepartmentList depl = parseDBDept();
+                storeDBInsertDept(depl);
+
+            }
 		}
 		else if(deleteFlag == 1)
 		{
-			printf("\n Delete Operation in progress");
+			if(strcmp(table, "Employee")==0)
+            {
+				printf("\n Delete Operation in progress");
+				tEmployeeList empl = parseDB();
+				// Get total lengthEmp of entries
+				lengthEmp = lengthEmployeeList(empl);
+				int i = 0;
+				for (i = 0; i < indice; i++)
+				{
+					printf("\n Field %d -> %s", i, auxillary[i]);
+				}
+				printf("\n Table -> %s",table);
+
+				// No conditions
+				if(where)
+				{
+					strcpy(argument1,"1");
+					strcpy(argument2,"1");
+					strcpy(operator, "=");
+					conditionLength++;
+				}
+
+				for (i = 0; i < conditionLength; i++)
+				{
+					printf("\n Argument_1 -> %s",argument1[i]);
+					printf("\n Argument_2 -> %s",argument2[i]);
+					printf("\n Argument_Opr -> %s\n\n",operator[i]);
+				}
+				// Iterate for every single employee
+				if(strcmp(table, "Employee")==0)
+				{
+					FILE *femp = fopen("EMP.txt", "w" );
+					for (k=0; k < lengthEmp; k++)
+					{
+						tEmployee ss1 = getEmployeeFromListByIndex (empl, k);
+						field1 = getField(argument1[0],ss1); // Get required field
+						printf("\n >>>1 %s", field1);
+						printf("\n %s", argument1[0]);
+
+						// Some error, exiting
+						if ((!strncmp(field1,argument1[0],strlen(field1))) || !strncmp(argument1[0],"\"",1))
+						{
+							printf("\n ERROR: Condition error;");
+							k = lengthEmp;
+						}
+
+						for(p = 0; p < lengthEmp; p++)
+						{
+							// Second list
+							tEmployee ss2 = getEmployeeFromListByIndex (empl, p);
+							for(conditionLoop = 0; conditionLoop< conditionLength; conditionLoop++)
+							{
+								field1 = getField(argument1[conditionLoop],ss1); // Get required field
+								field2 = getField(argument2[conditionLoop],ss2);
+								// printf("\n >>>2 %s %s",field1, field2);
+
+								if ((!strncmp(field2,argument2[conditionLoop],strlen(field2)) && k != lengthEmp)|| !strncmp(argument2[conditionLoop],"\"",1))
+								{
+									p = lengthEmp;
+									ss2 = ss1;
+								}
+
+								// strncmp returns an integral value indicating the relationship between the strings:
+								if (!strncmp(operator[conditionLoop],"=",1))
+								{
+									len = max(strlen(field1),strlen(field2));
+									printFlag = !strncmp(field1,field2,len);
+								}
+								else
+								{
+									atoi1 = atoi(field1);
+									atoi2 = atoi(field2);
+									if (atoi1 != NULL && atoi2 != NULL)
+										if (!strncmp(operator[conditionLoop],">",1))
+											printFlag = atoi1 > atoi2;
+										if (!strncmp(operator[conditionLoop],"<",1))
+											printFlag = atoi1 < atoi2;
+								}
+								if(!printFlag && isAndOrOrFlag == 0)
+								{
+									break;
+								}
+								else if(printFlag && isAndOrOrFlag == 1)
+								{
+									break;
+								}
+							}
+
+							if (!printFlag)
+							{
+
+								fprintf(femp, "%d,",ss2->indexNumber);
+								fprintf(femp, "%s,",ss2->ename);
+								fprintf(femp, "%s,",ss2->eage);
+								fprintf(femp, "%s,",ss2->eaddress);
+								fprintf(femp, "%s",ss2->salary);
+								fprintf(femp, "\n");
+							}
+						}
+					}
+					fclose(femp);
+				}
+			}
+			else
+			{
+				printf("\n Delete Operation in progress");
+                tDepartmentList depl = parseDBDept();
+                // Get total lengthDept of entries
+                lengthDept = lengthDepartmentList(depl);
+                int i = 0;
+                for (i = 0; i < indice; i++)
+                {
+                    printf("\n Field %d -> %s", i, auxillary[i]);
+                }
+                printf("\n Table -> %s",table);
+
+                // No conditions
+                if(where)
+                {
+                    strcpy(argument1,"1");
+                    strcpy(argument2,"1");
+                    strcpy(operator, "=");
+                    conditionLength++;
+                }
+
+                for (i = 0; i < conditionLength; i++)
+                {
+                    printf("\n Argument_1 -> %s",argument1[i]);
+                    printf("\n Argument_2 -> %s",argument2[i]);
+                    printf("\n Argument_Opr -> %s\n\n",operator[i]);
+                }
+                // Iterate for every single employee
+                if(strcmp(table, "Department")==0)
+                {
+                    FILE *fdept = fopen("DEPT1.txt", "w" );
+                    for (k=0; k < lengthDept; k++)
+                    {
+                        tDepartment ss1 = getDepartmentFromListByIndex (depl, k);
+                        field1 = getFieldDept(argument1[0],ss1); // Get required field
+                        // printf("\n >>>2 %s", field1);
+						// printf("\n %s", argument1[0]);
+                        // Some error, exiting
+                        if ((!strncmp(field1,argument1[0],strlen(field1))) || !strncmp(argument1[0],"\"",1))
+                        {
+                            printf("\n ERROR: Condition error;");
+                            k = lengthDept;
+                        }
+
+                        for(p = 0; p < lengthDept; p++)
+                        {
+                            // Second list
+                            tDepartment ss2 = getDepartmentFromListByIndex (depl, p);
+                            for(conditionLoop = 0; conditionLoop< conditionLength; conditionLoop++)
+                            {
+                                field1 = getFieldDept(argument1[conditionLoop],ss1); // Get required field
+                                field2 = getFieldDept(argument2[conditionLoop],ss2);
+                                // printf("\n >>>2 %s %s",field1, field2);
+
+                                if ((!strncmp(field2,argument2[conditionLoop],strlen(field2)) && k != lengthDept)|| !strncmp(argument2[conditionLoop],"\"",1))
+                                {
+                                    p = lengthDept;
+                                    ss2 = ss1;
+                                }
+
+                                // strncmp returns an integral value indicating the relationship between the strings:
+                                if (!strncmp(operator[conditionLoop],"=",1))
+                                {
+                                    len = max(strlen(field1),strlen(field2));
+                                    printFlag = !strncmp(field1,field2,len);
+                                }
+                                else
+                                {
+                                    atoi1 = atoi(field1);
+                                    atoi2 = atoi(field2);
+                                    if (atoi1 != NULL && atoi2 != NULL)
+                                        if (!strncmp(operator[conditionLoop],">",1))
+                                            printFlag = atoi1 > atoi2;
+                                        if (!strncmp(operator[conditionLoop],"<",1))
+                                            printFlag = atoi1 < atoi2;
+                                }
+                                if(!printFlag && isAndOrOrFlag == 0)
+                                {
+                                    break;
+                                }
+                                else if(printFlag && isAndOrOrFlag == 1)
+                                {
+                                    break;
+                                }
+                            }
+
+                            if (!printFlag)
+                            {
+
+                                fprintf(fdept, "%d,",ss2->indexNumber);
+                                fprintf(fdept, "%s,",ss2->dnum);
+                                fprintf(fdept, "%s,",ss2->dname);
+                                fprintf(fdept, "%s",ss2->dlocation);
+                                fprintf(fdept, "\n");
+                            }
+                        }
+                    }
+                    fclose(fdept);
+				}
+			}
+		}
+		else if(updateFlag == 1)
+		{
+			// Get all contents of file
 			tEmployeeList empl = parseDB();
 			// Get total lengthEmp of entries
 			lengthEmp = lengthEmployeeList(empl);
+
+			tDepartmentList deptl = parseDBDept();
+			lengthDept = lengthDepartmentList(deptl);
+
+			// This will read the command, indice gives lengthEmp
 			int i = 0;
 			for (i = 0; i < indice; i++)
 			{
@@ -754,7 +1043,6 @@ int main()
 			// Iterate for every single employee
 			if(strcmp(table, "Employee")==0)
 			{
-				FILE *femp = fopen("EMP.txt", "w" );
 				for (k=0; k < lengthEmp; k++)
 				{
 					tEmployee ss1 = getEmployeeFromListByIndex (empl, k);
@@ -810,30 +1098,113 @@ int main()
 							}
 						}
 
-						if (!printFlag)
+						if (printFlag)
 						{
-
-							fprintf(femp, "%d,",ss2->indexNumber);
-							fprintf(femp, "%s,",ss2->ename);
-							fprintf(femp, "%s,",ss2->eage);
-							fprintf(femp, "%s,",ss2->eaddress);
-							fprintf(femp, "%s",ss2->salary);
-							fprintf(femp, "\n");
+							for (i=0; i< indice; i++)
+							{
+								field = auxillary[i];
+								if(!strncmp(field,"indexNumber",10))
+									ss2->indexNumber = updateStore;
+								if(!strncmp(field,"ename",6))
+									ss2->ename = updateStore;
+								if(!strncmp(field,"eage",9))
+									ss2->eage = updateStore;
+								if(!strncmp(field,"salary",4))
+									ss2->salary = updateStore;
+								if(!strncmp(field,"eaddress",6))
+									ss2->eaddress = updateStore;
+							}
 						}
 					}
 				}
-				fclose(femp);
+				storeDB(empl);
 			}
-		}
-		else if(updateFlag == 1)
-		{
-			;
+			else
+			{
+				for (k=0; k < lengthDept; k++)
+				{
+					tDepartment ss1 = getDepartmentFromListByIndex (deptl, k);
+					field1 = getFieldDept(argument1[0],ss1); // Get required field
+					// printf(">>> %s", field1);
+
+					// Some error, exiting
+					if ((!strncmp(field1,argument1[0],strlen(field1))) || !strncmp(argument1[0],"\"",1))
+					{
+						printf("\n ERROR: Condition error;");
+						k = lengthDept;
+					}
+
+					for(p = 0; p < lengthDept;p++)
+					{
+						// Second list
+						tDepartment ss2 = getDepartmentFromListByIndex (deptl, p);
+						for(conditionLoop = 0; conditionLoop< conditionLength; conditionLoop++)
+						{
+							field1 = getFieldDept(argument1[conditionLoop],ss1); // Get required field
+							field2 = getFieldDept(argument2[conditionLoop],ss2);
+							// printf("\n >>>2 %s %s",field1, field2);
+
+							if ((!strncmp(field2,argument2[conditionLoop],strlen(field2)) && k != lengthDept)|| !strncmp(argument2[conditionLoop],"\"",1))
+							{
+								p = lengthDept;
+								ss2 = ss1;
+							}
+
+							if (!strncmp(operator[conditionLoop],"=",1))
+							{
+								len = max(strlen(field1),strlen(field2));
+								printFlag = !strncmp(field1,field2,len);
+								// printf("\n Printflag1 is %s %s", field1, field2);
+							}
+							else
+							{
+								atoi1 = atoi(field1);
+								atoi2 = atoi(field2);
+								if (atoi1 != NULL && atoi2 != NULL)
+									if (!strncmp(operator[conditionLoop],">",1))
+										printFlag = atoi1 > atoi2;
+									if (!strncmp(operator[conditionLoop],"<",1))
+										printFlag = atoi1 < atoi2;
+							}
+							if(!printFlag && isAndOrOrFlag == 0)
+							{
+								break;
+							}
+							else if(printFlag && isAndOrOrFlag == 1)
+							{
+								break;
+							}
+						}
+						// printf("\n Printflag2 is %d", printFlag);
+						// printf("\n>>>1 %s", ss2->dlocation);
+						if (printFlag)
+						{
+
+							i = 0;
+							for (i=0; i< indice; i++)
+							{
+								field = auxillary[i];
+								// if(!strncmp(field,"indexNumber",10))
+								// 	printf(" %d ",ss2->indexNumber);
+								if(!strncmp(field,"dnum",6))
+									ss2->dnum = updateStore;
+								if(!strncmp(field,"dname",9))
+									ss2->dname = updateStore;
+								if(!strncmp(field,"dlocation",6))
+									ss2->dlocation = updateStore;
+							}
+						}
+					}
+				}
+				storeDBDept(deptl);
+			}
 		}
 		getFlag = 0;
 		insertFlag = 0;
 		deleteFlag = 0;
 		updateFlag = 0;
 		conditionLength = 0;
+		indice = 0;
 	}
 	free(errorFlag);
 	free(remnant);
